@@ -5,6 +5,7 @@
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
 \usepackage{minted}
+\usepackage{upgreek}
 
 \newcommand{\Oh}{\mathcal{O}}
 
@@ -204,8 +205,11 @@
 
 	\begin{enumerate}
 		\item Começamos com~$(\mu, p) = (\emptyset, 0)$.
+			\vfill
 		\item \label{it:loop} Escolha~$i$ exposto, e encontre uma árvore alternante maximal em~$\tilde{G}_p$.
+			\vfill
 		\item Se~$j_0$ ou um item não comprado está na árvore, aumente o emparelhamento.
+			\vfill
 		\item Caso contrário, aumente os pesos de~$F_p(T)$, onde~$T$ são os participantes na árvore, e volte para o passo~\ref{it:loop}.
 	\end{enumerate}
 \end{frame}
@@ -222,15 +226,15 @@
 	Aumentaremos todos os pesos em~$F_p(T)$ por~$\d = \min(\din, \dfsb, \dout)$, onde
 	\vfill
 
-	$\din$ é o mínimo que devemos aumentar para criar uma nova primeira escolha.
-	\onslide<2->{$\din = \min\{u_i - v_{i, j} + p_j \mid i \in T,\ j \notin F_p(i)\}$}
+	\alert{$\din$} é o mínimo que devemos aumentar para criar uma nova melhor escolha.
+	\onslide<2->{$\din = \min\{u_i - v_{i, j} + p_j \mid i \in T,\ j \notin F_p(T),\ p_j < m_{i, j}\}$}
 	\vfill
 
-	$\dfsb$ é o mínimo que devemos aumentar para tornar uma aresta de primeira escolha em viável.
+	\alert{$\dfsb$} é o mínimo que devemos aumentar para tornar uma aresta de melhor escolha em viável.
 	\onslide<2->{$\dfsb = \min\{r_j - p_j \mid j \notin F_p(T)\}$}
 	\vfill
 
-	$\dout$ é o mínimo que devemos aumentar para que uma aresta de primeira escolha de~$T$ saia do grafo.
+	\alert{$\dout$} é o mínimo que devemos aumentar para que uma aresta de melhor escolha de~$T$ saia do grafo.
 	\onslide<2->{$\dout = \min\{m_{i, j} - p_j \mid i \in T,\ j \in F_p(i)\}$}
 
 \end{frame}
@@ -301,6 +305,71 @@
 			\vfill
 		\item Se provarmos que sequências de atualizações do tipo~$\din$ podem ser realizadas em tempo~$\Oh(k^2)$, a complexidade do laço interno fica~$\Oh(n k^3)$.~\onslide<4->{\alert{\checkmark}}
 	\end{enumerate}
+\end{frame}
+
+\newcommand{\gin}{\gamma^\mathit{in}}
+\newcommand{\gfsb}{\gamma^\mathit{fsb}}
+\newcommand{\gout}{\gamma^\mathit{out}}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Atualizações~$\din$}
+
+	Vamos manter os seguintes valores calculados durante o procedimento:
+	\vfill
+	\begin{itemize}
+		\item $u_i \coloneqq \max\{u_{i, j}(p_j) \mid j \in F_p(T)\}$ para todo~$i \in T$.
+			\vfill
+		\item $\gin_j \coloneqq \min\{u_i - v_{i,j} + p_j \mid i \in T,\ p_j < m_{i,j}\}$ para todo~$j \notin F_p(T)$.
+			\vfill
+		\item $\gfsb_j \coloneqq r_j - p_j$ para todo~$j \in F_p(T) \setminus \tilde{F}_p(T)$.
+			\vfill
+		\item $\gout_i \coloneqq \min\{m_{i,j} - p_j \mid j \in F_p(i)\}$ para todo~$i \in T$.
+			\vfill
+	\end{itemize}
+
+	Note que~$\din = \min\{\gin_j \mid j \notin F_p(T)\}$ e o análogo para~$\dfsb$ e~$\dout$.
+	\vfill
+	
+	Com estes valores calculados, conseguimos calcular~$\d$ em~$\Oh(k)$.
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Adicionando arestas}
+	Podemos fazer o algoritmo da árvore alternante maximal aos poucos com complexidade total~$\Oh(k^2)$.
+	\vfill
+
+	\begin{minipage}{0.45\textwidth}
+		\begin{tikzpicture}
+				\foreach \i in {1,...,10} { \pgfmathsetmacro{\p}{(6-\i)*.6} \draw (0, \p) node(i\i){}; }
+				\draw[decorate,decoration={brace,amplitude=10pt,raise=.4em}] (i6.south) -- (i1.north) node[draw=none,midway,left=1.1em]{$T$};
+				\draw[decorate,decoration={brace,amplitude=10pt,raise=.4em}] (i10.south) -- (i7.north) node[draw=none,midway,left=1.1em]{$A$};
+				\foreach \i in {1,...,5} { \pgfmathsetmacro{\p}{(6-\i)*.6} \draw (3, \p) node(j\i){}; }
+				\foreach \i in {6,...,9} { \pgfmathsetmacro{\p}{(5-\i)*.6} \draw (3, \p) node(j\i){}; }
+				\draw[decorate,decoration={brace,amplitude=10pt,raise=.4em}] (j1.north) -- (j5.south) node[draw=none,midway,right=1.1em]{$S$};
+				\draw[decorate,decoration={brace,amplitude=10pt,raise=.4em}] (j6.north) -- (j9.south) node[draw=none,midway,right=1.1em]{$B$};
+				\foreach \a/\b in {1/1,1/2,2/3,2/4,3/5} { \draw (i\a) edge (j\b); }
+				\foreach \a/\b in {2/1,3/2,5/3,6/5,4/4} { \draw (i\a) edge[very thick] (j\b); }
+				%%
+				\foreach \a/\b in {7/4, 9/5, 7/6, 8/8, 8/9, 9/9} { \draw (i\a) edge (j\b); }
+				\foreach \a/\b in {7/7, 8/6, 9/8, 10/9} { \draw (i\a) edge[very thick] (j\b); }
+				\draw (i5) edge[dotted] (j7);
+		\end{tikzpicture}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.54\textwidth}
+		Atualizações:
+		\begin{itemize}
+			\item $u_i$ em~$T$:~$\Oh(|T|)$.
+			\item $\gin$ em~$B$:~$\Oh(|B| (|T| + |A|))$.
+			\item $\gin$ em~$S$:~$\Oh(|S| |A|)$.
+			\item $\gfsb$:~$\Oh(|S|+|B|)$.
+			\item $\gout$ em~$A$:~$\Oh(|A| (|S| + |B|))$.
+			\item $\gout$ em~$T$:~$\Oh(|T| |B|)$.
+		\end{itemize}
+	\end{minipage}
+	\vfill
+
+	No total, temos um número constante de operações por par em~$S \times T$, e assim complexidade~$\Oh(k^2)$.
 \end{frame}
 
 \plain{}{\alert{Perguntas?}}
