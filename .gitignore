@@ -1,0 +1,19 @@
+## Latex stuff
+*.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.nav
+*.snm
+*.vrb
+_minted-main
+
+# Extra
+*.swp
+.lvimrc

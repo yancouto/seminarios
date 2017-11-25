@@ -1,0 +1,289 @@
+\documentclass[10pt, compress]{beamer}
+
+\usetheme{m}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{minted}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\algrenewcommand\algorithmicthen{:}
+\algrenewcommand\algorithmicdo{:}
+\algrenewcommand\algorithmicwhile{\textbf{enquanto}}
+\algrenewcommand\algorithmicreturn{\textbf{devolve}}
+
+
+\newcommand*{\algrule}[1][\algorithmicindent]{%
+  \makebox[#1][l]{%
+    \color{gray!60}
+    \hspace*{.2em}% <------------- This is where the rule starts from
+    \vrule height .75\baselineskip depth .25\baselineskip
+  }
+}
+\makeatletter
+\newcount\ALG@printindent@tempcnta
+\def\ALG@printindent{%
+    \ifnum \theALG@nested>0% is there anything to print
+    \ifx\ALG@text\ALG@x@notext% is this an end group without any text?
+    % do nothing
+    \else
+    \unskip
+    % draw a rule for each indent level
+    \ALG@printindent@tempcnta=1
+    \loop
+    \algrule[\csname ALG@ind@\the\ALG@printindent@tempcnta\endcsname]%
+    \advance \ALG@printindent@tempcnta 1
+    \ifnum \ALG@printindent@tempcnta<\numexpr\theALG@nested+1\relax
+    \repeat
+    \fi
+    \fi
+}
+% the following line injects our new indent handling code in place of the default spacing
+\patchcmd{\ALG@doentity}{\noindent\hskip\ALG@tlm}{\ALG@printindent}{}{\errmessage{failed to patch}}
+\patchcmd{\ALG@doentity}{\item[]\nointerlineskip}{}{}{} % no spurious vertical space
+
+	\let\OldStatex\Statex
+	\renewcommand{\Statex}[1][3]{%
+		\setlength\@tempdima{\algorithmicindent}%
+				\OldStatex\hskip\dimexpr#1\@tempdima\relax}
+\makeatother
+% end vertical rule patch for algorithmicx
+\usemintedstyle{trac}
+
+\usepackage{luacode}
+
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{matrix,backgrounds, decorations.pathreplacing, automata, arrows}
+
+\tikzset{onslide/.code args={<#1>#2}{%
+	\only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+}}
+\tikzset{
+	invisible/.style={opacity=0},
+	visible on/.style={alt={#1{}{invisible}}},
+	alt/.code args={<#1>#2#3}{%
+		\alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+	},
+	blink/.style={onslide={<#1> mLightBrown}},
+	appear/.style={visible on=<#1->, blink=#1}
+}
+
+\tikzset{
+	nodes={draw, circle, font=\scriptsize},
+	sibling distance=20pt,
+	edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}
+}
+
+\newwrite\luadebug
+\immediate\openout\luadebug luadebug.lua
+\AtEndDocument{\immediate\closeout\luadebug}
+\newcommand\directluadebug{\immediate\write\luadebug}
+
+\usepackage{mathtools}
+
+\title{Leilões com orçamento}
+\subtitle{Yan Soares Couto}
+\date{2017}
+\institute{Instituto de Matemática e Estatística}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}[fragile]
+	\frametitle{Problema - Entrada}
+
+	Dados:
+	\begin{itemize}
+		\item Conjunto~$I$ de~$n$ participantes.
+		\item Conjunto~$J$ de~$k$ itens com um item falso~$j_0$.
+		\item Preços mínimos~$r_j$ para todo~$j \in J$.
+		\item Valorações~$v_{i,j}$ para todo~$(i, j) \in I \times J$.
+		\item Preços máximos~$m_{i,j}$ para todo~$(i, j) \in I \times J$.
+	\end{itemize}
+
+	Tal que:
+	\begin{itemize}
+		\item $r_{j_0} = 0$
+		\item $m_{i, j_0} = \infty$ para todo~$i \in I$.
+		\item $v_{i, j_0} = 0$ para todo~$i \in I$.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Problema - Solução}
+
+	Solução:~$(\mu, p)$ com~$\mu \in I \times J$ com cada~$i \in I$ aparecendo exatamente uma vez em~$\mu$, e cada~$j \neq j_0$ no máximo uma vez, e~$p_j \geq 0$ para todo~$j \in J$, e~$p_{j_0} = 0$.
+	\vfill
+
+	Defina a utilidade de~$i \in I$ quando compra o item~$j \in J$ como
+		$$ u_{i,j}(p_j) = \left\{
+			\begin{array}{ll}
+				v_{i,j} - p_j & \text{se $p_j < m_{i,j}$} \\
+					-\infty & \text{se $p_j \geq m_{i, j}$}
+			\end{array} \right.
+				$$
+	\vfill
+
+	Defina~$u_i = u_{i,j}(p_j)$ para~$j$ tal que~$(i, j) \in \mu$. Se~$j = j_0$ dizemos que~$i$ \alert{não está emparelhado}.
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Problema - Propriedades}
+
+	$(\mu, p)$ é \alert{viável} se~$u_i \geq 0$ para todo~$i$ e~$p_j \geq r_j$ para todo~$(i, j) \in \mu$.
+	\vfill
+
+	$(\mu, p)$ é \alert{estável} se~$u_i \geq u_{i,j}(p_j)$ para todo~$j \in J$.
+	\vfill
+
+	$(\mu, p)$ é \alert{ótima} se é estável e, para toda solução estável~$(\mu', p')$, vale que~$u_i \geq u_i'$ para todo~$i$.
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Modelando como grafos}
+
+	Defina o \alert{grafo de melhores escolhas} para preços~$p$ como~$G_p \coloneqq (I \cup J, F_p)$, onde~$(i, j) \in F_p$ sse~${u_{i, j}(p_j) \geq u_{i, j'}(p_{j'})}$ para todo~$j'$.
+	\vfill
+
+	Defina o \alert{grafo de melhores escolhas viáveis} para preços~$p$ como~$\tilde{G}_p \coloneqq (I \cup J, \tilde{F}_p)$, onde~$(i, j) \in \tilde{F}_p$ sse~$(i, j) \in F_p$ e~$p_j \geq r_j$.
+	\vfill
+
+	Considere~$\hat{\mu} \coloneqq \{(i, j) \in \mu \mid j \neq j_0\}$. Note que~$\hat{\mu}$ é um emparelhamento nesses grafos. Um \alert{caminho alternante} em~$\tilde{F}_p$ é um caminho que alterna entre arestas emparelhadas e não emparelhadas.
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Árvore alternante}
+
+	Uma \alert{árvore alternante} é uma árvore na qual cada caminho da raiz a uma folha é um caminho alternante. Tal árvore é \alert{maximal} se não pode ser extendida.
+
+	Nesse caso, cada folha é o item falso, um item sem comprador, ou um participante cujas melhores escolhas viáveis já estão na árvore.
+
+	\begin{figure}
+		\begin{minipage}{0.4\textwidth}
+			\begin{tikzpicture}
+				\pgfmathsetmacro{\rs}{2.5}
+				\foreach \i in {1,...,6} { \pgfmathsetmacro{\p}{(6-\i)*.8} \draw (0, \p) node(i\i){$i_\i$}; }
+				\foreach \j in {1,...,5} { \pgfmathsetmacro{\p}{(6-\j)*.8} \draw (\rs, \p) node(j\j){$j_\j$}; }
+				\draw (\rs, 0) node(j0){$j_0$};
+				\foreach \a/\b in {1/1,1/2,2/3,2/4,3/0,6/0, 4/4} { \draw (i\a) edge (j\b); }
+				\foreach \a/\b in {2/1,3/2,5/0} { \draw (i\a) edge[very thick] (j\b); }
+				\foreach \a/\b in {3/5} { \draw (i\a) edge[dashed] (j\b); }
+
+			\end{tikzpicture}
+		\end{minipage}
+		\begin{minipage}{0.4\textwidth}
+			\begin{tikzpicture}
+				\Tree [.{$i_1$} [.{$j_1$} \edge[very thick]; [.{$i_2$} $j_3$ $j_4$ ] ] [.{$j_2$} \edge[very thick]; [.{$i_3$} [.{$j_0$} ] ] ] ]
+			\end{tikzpicture}
+		\end{minipage}
+		\begin{minipage}{0.18\textwidth}
+			\begin{tikzpicture}[nodes={draw=none}]
+				\draw (0, 0)  edge[very thick] (.4, 0);
+				\draw (.4, 0) node[right]{em~$\tilde{F}_p \cap \mu$};
+				\draw (0, -.5)  edge (.4, -.5);
+				\draw (.4, -.5) node[right]{em~$\tilde{F}_p \setminus \mu$};
+				\draw (0, -1)  edge[dashed] (.4, -1);
+				\draw (.4, -1) node[right]{em~$F_p \setminus \tilde{F}_p$};
+				\draw (-.25, .25) rectangle (2, -1.25);
+			\end{tikzpicture}
+		\end{minipage}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Ideia geral}
+
+	\begin{enumerate}
+		\item Começamos com~$(\mu, p) = (\emptyset, 0)$.
+		\item \label{it:loop} Escolha~$i$ exposto, e encontre uma árvore alternante maximal em~$\tilde{G}_p$.
+		\item Se~$j_0$ ou um item não comprado está na árvore, aumente o emparelhamento.
+		\item Caso contrário, aumente os pesos de~$F_p(T)$, onde~$T$ são os participantes na árvore, e volte para o passo~\ref{it:loop}.
+	\end{enumerate}
+\end{frame}
+
+\renewcommand{\d}{\delta}
+\newcommand{\din}{\delta_\mathit{in}}
+\newcommand{\dout}{\delta_\mathit{out}}
+\newcommand{\dfsb}{\delta_\mathit{fsb}}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Aumentando preços}
+
+
+	Aumentaremos todos os pesos em~$F_p(T)$ por~$\d = \min(\din, \dfsb, \dout)$, onde
+	\vfill
+
+	$\din$ é o mínimo que devemos aumentar para criar uma nova primeira escolha.
+	\onslide<2->{$\din = \min\{u_i - v_{i, j} + p_j \mid i \in T,\ j \notin F_p(i)\}$}
+	\vfill
+
+	$\dfsb$ é o mínimo que devemos aumentar para tornar uma aresta de primeira escolha em viável.
+	\onslide<2->{$\dfsb = \min\{r_j - p_j \mid j \notin F_p(T)\}$}
+	\vfill
+
+	$\dout$ é o mínimo que devemos aumentar para que uma aresta de primeira escolha de~$T$ saia do grafo.
+	\onslide<2->{$\dout = \min\{m_{i, j} - p_j \mid i \in T,\ j \in F_p(i)\}$}
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Emparelhamentos}
+
+	Não existe item em~$F_p(T)$ emparelhado com participante fora de~$T$.
+	\vfill
+
+	\begin{figure}
+		\begin{minipage}{0.45\textwidth}
+			Caso 1: \\[2ex]
+			\begin{tikzpicture}
+				\draw (0, 3) node(A){$i$};
+				\draw (3, 2) node(B){$j$};
+				\draw (0, 1) node(C){$i'$};
+				\draw (A) edge (B);
+				\draw (C) edge[very thick] (B);
+			\end{tikzpicture}
+			$$ i \in T \implies i' \in T $$
+		\end{minipage}
+		\begin{minipage}{0.45\textwidth}
+			Caso 2: \\[2ex]
+			\begin{tikzpicture}
+				\draw (0, 3) node(A){$i$};
+				\draw (3, 2) node(B){$j$};
+				\draw (0, 1) node(C){$i'$};
+				\draw (A) edge[dashed] (B);
+				\draw (C) edge[very thick] (B);
+			\end{tikzpicture}
+			$$ i \in T \implies \bot $$
+		\end{minipage}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Pseudocódigo}
+	\begin{algorithmic}[1]
+		\State Inicialize~$(\mu, p) = (\emptyset, 0)$
+		\While{existe~$i_0$ não emparelhado}
+			\State Seja~$T$ e~$S$ o conjunto de participantes e itens de uma
+			\Statex[2] árvore alternante máxima em~$\tilde{G}_p$.
+			\While{todos~$j \in S$ estão emparelhados e~$j_0 \notin S$}
+				\State Calcule~$\d = \min(\din, \dfsb, \dout)$.
+				\State Faça~$p_j = p_j + \d$ para todo~$j \in F_p(T)$.
+				\State $\mu = \mu \cap \tilde{F}_p$
+				\State Seja~$T$ e~$S$ o conjunto de participantes e itens de uma
+				\Statex[3] árvore alternante máxima em~$\tilde{G}_p$.
+			\EndWhile
+			\State Aumente~$\mu$ usando o caminho alternante na árvore.
+		\EndWhile
+		\State \Return $(\mu, p)$
+	\end{algorithmic}
+\end{frame}
+
+\plain{}{\alert{Perguntas?}}
+
+\end{document}
