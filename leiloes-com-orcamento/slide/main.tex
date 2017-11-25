@@ -5,6 +5,9 @@
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
 \usepackage{minted}
+
+\newcommand{\Oh}{\mathcal{O}}
+
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 
@@ -282,6 +285,22 @@
 		\EndWhile
 		\State \Return $(\mu, p)$
 	\end{algorithmic}
+	\vfill
+	\textbf{Corretude.} O algoritmo termina e devolve uma solução viável e estável.~\onslide<2->{\alert{\checkmark}}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Algoritmo - Complexidade}
+	\textbf{Complexidade.} O algoritmo pode ser implementado em tempo~$\Oh(n k^3)$.
+	\vfill
+
+	\begin{enumerate}
+		\item \makebox[\linewidth][l]{Uma árvore alternante maximal pode ser encontrada em~$\Oh(k^2)$.~\onslide<2->{\alert{\checkmark}}}
+			\vfill
+		\item O laço externo consome tempo~$\Oh(n k^3)$.~\onslide<3->{\alert{\checkmark}}
+			\vfill
+		\item Se provarmos que sequências de atualizações do tipo~$\din$ podem ser realizadas em tempo~$\Oh(k^2)$, a complexidade do laço interno fica~$\Oh(n k^3)$.~\onslide<4->{\alert{\checkmark}}
+	\end{enumerate}
 \end{frame}
 
 \plain{}{\alert{Perguntas?}}
