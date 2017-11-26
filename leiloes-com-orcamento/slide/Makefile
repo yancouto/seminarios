@@ -6,4 +6,4 @@ pvc:
 
 clean:
 	latexmk --pdf -lualatex -shell-escape main.tex -C
-	rm -f *.nav *.snm *.vrb
+	rm -rf *.nav *.snm *.vrb luadebug.lua _minted-main

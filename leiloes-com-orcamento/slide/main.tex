@@ -136,7 +136,7 @@
 
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile,label=solucao]
 	\frametitle{Problema - Propriedades}
 
 	$(\mu, p)$ é \alert{viável} se~$u_i \geq 0$ para todo~$i$ e~$p_j \geq r_j$ para todo~$(i, j) \in \mu$.
@@ -370,6 +370,38 @@
 	\vfill
 
 	No total, temos um número constante de operações por par em~$S \times T$, e assim complexidade~$\Oh(k^2)$.
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Resultados}
+	\textbf{Provamos:} O algoritmo discutido encontra uma solução viável e estável em tempo~$\Oh(n k^3)$.
+	\vfill
+
+	\textbf{Teorema.} A solução devolvida pelo algoritmo é \hyperlink{solucao}{\alert{ótima}}.
+	\vfill
+
+	\textbf{Exemplo.} Nenhum algoritmo para resolver o problema é à prova de estratégia.
+	\vfill
+
+	\textbf{Teorema.} O algoritmo também pode ser usado para resolver o problema se a função de utilidade for~$u_{i,j}(p_j) = v_{i, j} - c_i c_j p_j$.
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Função mais genérica}
+	Dados~$\hat{v}$,~$\hat{m}$ e~$\hat{r}$. Encontre~$(\hat{\mu}, \hat{p})$ que siga as restrições do problema original, exceto que~$\hat{u}_{i,j}(\hat{p}_j) = \hat{v}_{i,j} - c_i c_j \hat{p}_j$.
+	\vfill
+
+	Defina~$v$,~$m$ e~$r$ tal que~$v_{i, j} = \frac{\hat{v}_{i, j}}{c_i}$,~$m_{i,j} = \hat{m}_{i,j} c_j$ e~$r_j = \hat{r}_j c_j$. Seja~$(\mu, p)$ uma solução para o problema, e considere~$(\hat{\mu}, \hat{p})$, onde~$\hat{\mu} = \mu$ e~$\hat{p}_j = \frac{p_j}{c_j}$.
+	\vfill
+
+	Se~$(\mu, p)$ é \alert{viável} então~$(\hat{\mu}, \hat{p})$ também é. \onslide<2->{\alert{\checkmark}}
+	\vfill
+
+	Se~$(\mu, p)$ é \alert{estável} então~$(\hat{\mu}, \hat{p})$ também é. \onslide<3->{\alert{\checkmark}}
+	\vfill
+
+	Se~$(\mu, p)$ é \alert{ótima} então~$(\hat{\mu}, \hat{p})$ também é. \onslide<4->{\alert{\checkmark}}
 \end{frame}
 
 \plain{}{\alert{Perguntas?}}
