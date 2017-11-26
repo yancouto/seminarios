@@ -4,6 +4,7 @@ all:
 full:
 	texliveonfly -c lualatex --arguments="-shell-escape -interaction=nonstopmode" main.tex
 	latexmk --pdf -lualatex -shell-escape main.tex
+	cp main.pdf ../site/seminario-aho-corasick.pdf
 
 pvc:
 	latexmk --pdf -lualatex -shell-escape -pvc -interaction=nonstopmode main.tex

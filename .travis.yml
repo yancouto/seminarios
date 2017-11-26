@@ -1,0 +1,23 @@
+branches:
+    only: master
+language: r
+addons:
+    apt:
+        packages:
+            - python-pygments
+before_install:
+    - tlmgr install texliveonfly
+    - tlmgr install latexmk
+    - tlmgr install babel-portuges
+    - tlmgr install courier
+    - tlmgr install lm
+    - tlmgr install luaotfload
+script:
+    - make full
+deploy:
+    provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    local_dir: site
+    on:
+        branch: master
